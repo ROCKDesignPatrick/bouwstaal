@@ -1,0 +1,141 @@
+@import "mixins", "variables";
+
+/* GENERAL STYLES */
+html,
+body {
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: none;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: $base;
+}
+
+a {
+    color: $blue;
+}
+
+p {
+    &.desc {
+        color: rgba($darkBlue, 0.5);
+    }
+}
+
+#header {
+    position: fixed;
+    width: $navWidth;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: $darkBlue;
+    color: rgba(#fff, 0.75);
+
+    a {
+        color: #fff;
+    }
+}
+
+#mainNav {
+    position: relative;
+
+    >ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+
+        >li {
+            position: relative;
+            border-bottom: 1px solid rgba(#fff, 0.1);
+
+            >a {
+                position: relative;
+                display: block;
+                padding: 0 1em;
+                line-height: 44px;
+                text-decoration: none;
+                color: #fff;
+                font-weight: 500;
+
+                .message-counter {
+                    position: absolute;
+                    top: 50%;
+                    right: 1em;
+                    @include transform(translateY(-50%));
+                    min-width: 18px;
+                    height: 18px;
+                    line-height: 18px;
+                    background-color: #fff;
+                    color: $blue;
+                    font-size: 0.65rem;
+                    font-weight: 600;
+                    text-align: center;
+                    @include borderradius(3px);
+                    padding: 0 0.25em;
+                }
+
+                &:hover {
+                    background-color: rgba(#fff, 0.1);
+                    color: #fff;
+                }
+            }
+        }
+    }
+}
+
+#mainContainer {
+    position: relative;
+    width: calc(100% - $navWidth);
+    min-height: 100vh;
+    margin-left: $navWidth;
+    background-color: $light;
+}
+
+.table {
+    @include borderradius;
+    font-size: 0.9rem;
+
+    .actions {
+        display: flex;
+        flex-flow: row nowrap;
+        gap: 0.5em;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    tr {
+
+        th,
+        td {
+            padding: 0.5rem 0.75rem;
+        }
+
+        &.read {
+            td {
+                background-color: rgba(#fff, 0.5);
+                color: $base;
+
+                a {
+                    color: $base;
+                }
+            }
+        }
+
+        &.unread {
+            td {
+                &.title {
+                    font-weight: 700;
+                }
+            }
+        }
+    }
+}
+
+section {
+    padding: 3em 0;
+}
