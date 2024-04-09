@@ -24,18 +24,17 @@
         <div id="mainNav">
             <ul>
                 <li>
-                    <a href="">Home</a>
+                    <a href="<?php echo home_url() ?>">Home</a>
                 </li>
                 <li>
-                    <a href="<?php the_permalink(13); ?>">Berichten <div class="message-counter"><?php echo get_unread_messages_counter(); ?></div></a>
+                    <a href="<?php the_permalink(13); ?>">Berichten <div class="message-counter"><?php echo get_unread_messages_counter('post'); ?></div></a>
                 </li>
                 <li>
-                    <a href="">Documenten <div class="message-counter">0</div></a>
+                    <a href="<?php the_permalink(21); ?>">Documenten <div class="message-counter"><?php echo get_unread_messages_counter('document'); ?></div></a>
                 </li>
+                <li><a href="<?php echo wp_logout_url() ?>">Uitloggen</a></li>
             </ul>
         </div>
-        <?php //wp_nav_menu(array('theme_location' => 'mainnav', 'container' => 'div', 'container_id' => 'mainNav')); 
-        ?>
     </div>
 
     <div id="mainContainer">

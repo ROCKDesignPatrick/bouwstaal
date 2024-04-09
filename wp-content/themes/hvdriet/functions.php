@@ -33,9 +33,16 @@ function rockdesign_custom_menus()
 // ADD WOOCOMMERCE SUPPORT
 add_theme_support('woocommerce');
 
+add_action('wp_ajax_increment_post_views', 'increment_post_views');
+
 // Function to increment post views count
 function increment_post_views($post_id)
 {
+    if (wp_doing_ajax()) {
+        $post_id = $_POST['data'];
+        message_status($_POST['data']);
+    }
+
     // Get current user ID
     $iCurrentUserID = get_current_user_id();
 
@@ -67,21 +74,19 @@ function track_post_views()
 add_action('wp_head', 'track_post_views');
 
 // Function to get unread messages for current user
-function get_unread_messages_counter()
+function get_unread_messages_counter($type)
 {
     // Get current user ID
     $iCurrentUserID = get_current_user_id();
 
     $args = array(
-        'post_type' => 'post', // Change 'post' to your custom post type if needed
-        'posts_per_page' => -1, // Retrieve all posts
+        'post_type' => $type,
+        'posts_per_page' => -1,
         'fields' => 'ids'
     );
 
     // Fetch all posts
     $query = new WP_Query($args);
-
-    //echo '<pre>' . print_r($query, true) . '</pre>';
 
     if ($query->posts) {
         // Counter for unread posts
@@ -119,19 +124,11 @@ function message_status($post_id)
     return $sMessageStatus;
 }
 
-//add_action('publish_post', 'send_email_on_post_publish', 10, 2);
+add_action('publish_post', 'send_email_on_post_publish', 10, 2);
 
 // Function to send mail to predefined recipients
 function send_email_on_post_publish($ID, $post)
 {
-    // Get recipients' email addresses
-    $recipients = array(
-        'email1@example.com',
-        'email2@example.com',
-        'email3@example.com'
-    );
-
-    // Get post title and permalink
     $post_title = $post->post_title;
     $post_permalink = get_permalink($ID);
 
@@ -143,8 +140,73 @@ function send_email_on_post_publish($ID, $post)
     $message .= 'Title: ' . $post_title . "\n\n";
     $message .= 'Read it here: ' . $post_permalink;
 
-    // Send email to each recipient
-    foreach ($recipients as $recipient) {
-        wp_mail($recipient, $subject, $message);
+    $recipient = get_field('ontvangers', $ID);
+    $specificRecipients = get_field('medewerkers', $ID);
+
+    if ($recipient == 'employees') {
+        $users = get_users([
+            'role' => 'subscriber',
+        ]);
+    }
+    if ($recipient == 'employee') {
+        $users = get_users([
+            'role' => 'subscriber',
+            'include' => $specificRecipients
+        ]);
+    }
+
+    foreach ($users as $user) {
+        //wp_mail($user->data->user_email, $subject, $message);
+        wp_mail('info@rockdesign.nl', $subject, $message);
+    }
+}
+
+
+remove_role('editor');
+remove_role('contributor');
+remove_role('author');
+
+// Change role name
+function change_role_name()
+{
+    global $wp_roles;
+
+    if (!isset($wp_roles)) {
+        $wp_roles = new WP_Roles();
+    }
+
+    $wp_roles->roles['subscriber']['name'] = 'Medewerker';
+    $wp_roles->role_names['subscriber'] = 'Medewerker';
+}
+add_action('init', 'change_role_name');
+
+
+
+add_action('template_redirect', 'redirect_to_specific_page');
+function redirect_to_specific_page()
+{
+    if (!is_user_logged_in()) {
+        auth_redirect();
+        exit;
+    }
+}
+
+add_filter('login_redirect', 'custom_redirect_after_login_subscriber', 10, 3);
+function custom_redirect_after_login_subscriber($redirect_to)
+{
+    if (!current_user_can('subscriber') && !is_admin()) {
+        $redirect_to = '/';
+    }
+
+    return $redirect_to;
+}
+
+
+
+add_action('after_setup_theme', 'remove_admin_bar');
+function remove_admin_bar()
+{
+    if (!current_user_can('administrator') && !is_admin()) {
+        show_admin_bar(false);
     }
 }

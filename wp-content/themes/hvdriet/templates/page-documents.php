@@ -16,21 +16,20 @@ get_header();
         $user = wp_get_current_user();
         $userID = $user->ID;
         $userRole = $user->roles[0];
-        // get_current_user_role
         $canView = false;
 
         $aPosts = new WP_Query([
-            'post_type' => 'post',
+            'post_type' => 'document',
             'posts_per_page' => 5,
         ]);
 
         if ($aPosts->have_posts()) : ?>
-
             <table class="table">
                 <thead>
                     <tr>
                         <th scope="col">Titel</th>
                         <th scope="col">Gepubliceerd op</th>
+                        <th scope="col">Acties</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,6 +42,7 @@ get_header();
                         $recievers = get_field('ontvangers');
                         $employees = get_field('medewerkers');
                         $canView = false;
+                        $file = get_field('file');
 
                         if ($userRole == 'administrator' || $recievers == 'employees') {
                             $canView = true;
@@ -55,8 +55,9 @@ get_header();
 
                         <?php if ($canView) : ?>
                             <tr class="<?php echo $sPostStatus; ?>">
-                                <td class="title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></td>
+                                <td><a href="<?php echo $file['url'] ?>" data-click="set-post-unread" data-post-id="<?php echo $post_id ?>" target="_blank"><?php the_title(); ?> (<?php echo size_format($file['filesize']) ?>)</a></td>
                                 <td><?php echo $post_date; ?></td>
+                                <td><a href="<?php echo $file['url'] ?>" data-click="set-post-unread" data-post-id="<?php echo $post_id ?>" download>Download bestand</a></td>
                             </tr>
                         <?php endif; ?>
 
@@ -69,4 +70,24 @@ get_header();
         wp_reset_postdata(); ?>
     </div>
 </section>
-<?php get_footer();
+<?php get_footer(); ?>
+
+<script>
+    jQuery(document).ready(function($) {
+        $('[data-click="set-post-unread"]').on('click', function(e) {
+            let ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
+            let postID = $(this).data('post-id')
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'increment_post_views',
+                    data: postID,
+                },
+                success: function(response) {
+                    window.location.reload();
+                }
+            });
+        });
+    });
+</script>
