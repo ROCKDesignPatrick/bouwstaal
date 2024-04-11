@@ -1,11 +1,11 @@
 <?php get_header(); ?>
 <?php if (have_posts()) : ?>
     <?php while (have_posts()) : the_post(); ?>
-        <section>
-        	<div class="container">
-				<?php the_title(); ?>
+        <section class="messages">
+            <div class="container">
+                <?php the_title(); ?>
                 <?php the_content(); ?>
-        	</div>
+            </div>
         </section>
     <?php endwhile; ?>
 <?php endif; ?>

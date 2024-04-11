@@ -6,26 +6,6 @@ Template name: Berichtenpagina
 get_header();
 ?>
 
-
-<?php
-
-$args = ['post_type' => 'post', 'posts_per_page' => 1, 'paged' => $paged];
-query_posts($args);
-?>
-
-
-<?php if (have_posts()) : ?>
-    <?php while (have_posts()) : the_post(); ?>
-        <?php the_title(); ?>
-    <?php endwhile; ?>
-
-    <?php the_posts_pagination(); ?>
-<?php else : ?>
-<?php endif; ?>
-
-
-
-
 <section id="" class="">
     <div class="container">
         <h1><?php the_title(); ?></h1>
@@ -36,23 +16,20 @@ query_posts($args);
         $user = wp_get_current_user();
         $userID = $user->ID;
         $userRole = $user->roles[0];
-        // get_current_user_role
         $canView = false;
-        $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 
         $aPosts = new WP_Query([
-            'post_type' => 'post',
-            'posts_per_page' => 1,
-            'paged'          => $paged
+            'post_type' => 'document',
+            'posts_per_page' => 5,
         ]);
 
         if ($aPosts->have_posts()) : ?>
-
             <table class="table">
                 <thead>
                     <tr>
                         <th scope="col">Titel</th>
                         <th scope="col">Gepubliceerd op</th>
+                        <th scope="col">Acties</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,6 +42,7 @@ query_posts($args);
                         $recievers = get_field('ontvangers');
                         $employees = get_field('medewerkers');
                         $canView = false;
+                        $file = get_field('file');
 
                         if ($userRole == 'administrator' || $recievers == 'employees') {
                             $canView = true;
@@ -77,22 +55,39 @@ query_posts($args);
 
                         <?php if ($canView) : ?>
                             <tr class="<?php echo $sPostStatus; ?>">
-                                <td class="title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></td>
+                                <td><a href="<?php echo $file['url'] ?>" data-click="set-post-unread" data-post-id="<?php echo $post_id ?>" target="_blank"><?php the_title(); ?> (<?php echo size_format($file['filesize']) ?>)</a></td>
                                 <td><?php echo $post_date; ?></td>
+                                <td><a href="<?php echo $file['url'] ?>" data-click="set-post-unread" data-post-id="<?php echo $post_id ?>" download>Download bestand</a></td>
                             </tr>
                         <?php endif; ?>
 
                     <?php endwhile; ?>
                 </tbody>
             </table>
-
-            <?php the_posts_pagination(); ?>
         <?php else : ?>
             <p>Er zijn momenteel geen berichten.</p>
         <?php endif;
-
-
         wp_reset_postdata(); ?>
     </div>
 </section>
-<?php get_footer();
+<?php get_footer(); ?>
+
+<script>
+    jQuery(document).ready(function($) {
+        $('[data-click="set-post-unread"]').on('click', function(e) {
+            let ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
+            let postID = $(this).data('post-id')
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'increment_post_views',
+                    data: postID,
+                },
+                success: function(response) {
+                    window.location.reload();
+                }
+            });
+        });
+    });
+</script>
