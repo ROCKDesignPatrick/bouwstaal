@@ -74,7 +74,7 @@ function track_post_views()
 add_action('wp_head', 'track_post_views');
 
 // Function to get unread messages for current user
-function get_unread_messages_counter($type)
+function get_unread_messages_counter(string $type)
 {
     // Get current user ID
     $iCurrentUserID = get_current_user_id();
@@ -106,7 +106,7 @@ function get_unread_messages_counter($type)
 
 
 // Function to determine if user has read message
-function message_status($post_id)
+function message_status(int $post_id)
 {
     // Get current user ID
     $iCurrentUserID = get_current_user_id();
@@ -127,7 +127,7 @@ function message_status($post_id)
 add_action('publish_post', 'send_email_on_post_publish', 10, 2);
 
 // Function to send mail to predefined recipients
-function send_email_on_post_publish($ID, $post)
+function send_email_on_post_publish(int $ID, object $post)
 {
     $post_title = $post->post_title;
     $post_permalink = get_permalink($ID);
@@ -192,7 +192,7 @@ function redirect_to_specific_page()
 }
 
 add_filter('login_redirect', 'custom_redirect_after_login_subscriber', 10, 3);
-function custom_redirect_after_login_subscriber($redirect_to)
+function custom_redirect_after_login_subscriber(string $redirect_to)
 {
     if (!current_user_can('subscriber') && !is_admin()) {
         $redirect_to = '/';

@@ -6,6 +6,26 @@ Template name: Berichtenpagina
 get_header();
 ?>
 
+
+<?php
+
+$args = ['post_type' => 'post', 'posts_per_page' => 1, 'paged' => $paged];
+query_posts($args);
+?>
+
+
+<?php if (have_posts()) : ?>
+    <?php while (have_posts()) : the_post(); ?>
+        <?php the_title(); ?>
+    <?php endwhile; ?>
+
+    <?php the_posts_pagination(); ?>
+<?php else : ?>
+<?php endif; ?>
+
+
+
+
 <section id="" class="">
     <div class="container">
         <h1><?php the_title(); ?></h1>
@@ -18,10 +38,12 @@ get_header();
         $userRole = $user->roles[0];
         // get_current_user_role
         $canView = false;
+        $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 
         $aPosts = new WP_Query([
             'post_type' => 'post',
-            'posts_per_page' => 5,
+            'posts_per_page' => 1,
+            'paged'          => $paged
         ]);
 
         if ($aPosts->have_posts()) : ?>
@@ -63,9 +85,13 @@ get_header();
                     <?php endwhile; ?>
                 </tbody>
             </table>
+
+            <?php the_posts_pagination(); ?>
         <?php else : ?>
             <p>Er zijn momenteel geen berichten.</p>
         <?php endif;
+
+
         wp_reset_postdata(); ?>
     </div>
 </section>
